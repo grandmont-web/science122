@@ -609,6 +609,17 @@
                 localStorage.removeItem(STORAGE_KEY);
             }
         }
+
+        // 加入 Enter 鍵監聽 (密碼)
+        const pwdInput = document.getElementById("password-input");
+        if(pwdInput) {
+            pwdInput.addEventListener("keyup", function(event) {
+                if (event.key === "Enter") {
+                    event.preventDefault(); 
+                    checkPassword();
+                }
+            });
+        }
     };
 
     function saveProgress() {
@@ -744,8 +755,8 @@
         const loginMsg = document.getElementById("login-msg");
         
         btn.disabled = true;
-        btn.innerText = "載入中..."; 
-        loginMsg.innerText = "";
+        btn.innerText = "檢查中..."; 
+        loginMsg.innerText = "正在檢查學生狀態...";
 
         let fullStudentString = "";
         let classNo = "";
@@ -766,6 +777,7 @@
             if(!fullStudentString) {
                 btn.disabled = false;
                 btn.innerText = "開始評估";
+                loginMsg.innerText = "";
                 return alert("請選擇學生");
             }
             const parts = fullStudentString.match(/^(\d+)\s+(.+)$/);
@@ -791,14 +803,9 @@
 
         const checkUrl = `${GOOGLE_SCRIPT_URL}?class=${cls}&no=${classNo}`;
         
-        const timeout = 2000; 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-        fetch(checkUrl, { signal: controller.signal })
+        fetch(checkUrl)
             .then(response => response.json())
             .then(data => {
-                clearTimeout(timeoutId);
                 if (data.locked) {
                     btn.disabled = false;
                     btn.innerText = "開始評估";
@@ -809,8 +816,11 @@
                 }
             })
             .catch(err => {
-                console.warn("Lock check failed or timed out, proceeding in offline mode.", err);
-                runGame(); 
+                console.error("Lock check failed", err);
+                btn.disabled = false;
+                btn.innerText = "開始評估";
+                loginMsg.innerText = "⚠️ 無法連接伺服器檢查狀態，請檢查網絡或稍後再試。";
+                alert("無法連接伺服器檢查狀態。為確保公平性，無法在離線狀態下開始。請檢查網絡連線。");
             });
     }
 
