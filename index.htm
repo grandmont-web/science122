@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>一年級科學科 學段二 評估二</title>
+    <style>
+        :root {
+            --primary-color: #5C9CE6;
+            --primary-dark: #357ABD;
+            --success-color: #81C784;
+            --bg-color: #EBF4FA;
+            --card-bg: #FFFFFF;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overscroll-behavior: none; 
+            touch-action: pan-y;
+        }
+
+        * {
+            -webkit-user-select: none;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #64B5F6, #1976D2);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            position: relative; /* 為了定位登出按鈕 */
+        }
+
+        h1 { margin: 0; font-size: 1.6em; }
+        h2 { margin: 5px 0 0 0; font-size: 1.1em; opacity: 0.95; }
+
+        /* 登出按鈕樣式 */
+        .logout-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: #FF5252;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: none; /* 預設隱藏，登入後顯示 */
+        }
+        .logout-btn:active { transform: scale(0.95); background-color: #D32F2F; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .hidden { display: none !important; }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--text-color); font-size: 1.1em; }
+        select, input {
+            width: 100%; padding: 15px; font-size: 1.1em;
+            border: 2px solid #B0BEC5; border-radius: 12px;
+            background: #FAFAFA;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.4rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 6px 15px rgba(74, 144, 226, 0.3);
+            transition: transform 0.1s;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 10px;
+        }
+        .btn:active { transform: scale(0.95); background-color: var(--primary-dark); }
+        .btn:disabled { background-color: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #E1F5FE;
+            padding: 12px 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #0277BD;
+            font-size: 1.2em;
+        }
+
+        .instruction { 
+            font-size: 1.5em; 
+            margin-bottom: 25px; 
+            color: #444; 
+            line-height: 1.4;
+        }
+
+        .play-area {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            min-height: 450px;
+        }
+
+        .buckets-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            flex-wrap: nowrap;
+        }
+
+        .bucket {
+            flex: 1;
+            min-width: 45%;
+            border: 4px dashed #BDBDBD;
+            border-radius: 20px;
+            background: #FAFAFA;
+            padding: 15px 10px;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .bucket.active-drop {
+            background-color: #C8E6C9;
+            border-color: #2E7D32;
+            border-style: solid;
+            box-shadow: 0 0 15px rgba(46, 125, 50, 0.3);
+            transform: scale(1.02);
+        }
+
+        .bucket-label {
+            font-size: 1.6em; 
+            font-weight: bold; 
+            color: #555;
+            margin-bottom: 15px; 
+            background: #fff; 
+            padding: 8px 20px;
+            border-radius: 15px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 90%;
+            border: 1px solid #eee;
+            pointer-events: none;
+        }
+
+        .ordering-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 10px;
+            margin: 10px 0;
+            background: #F5F5F5;
+            padding: 20px 10px;
+            border-radius: 20px;
+        }
+        
+        .order-slot {
+            flex: 1;
+            height: 180px;
+            border: 3px solid #CFD8DC;
+            border-radius: 15px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .order-slot.active-drop {
+            background-color: #BBDEFB;
+            border-color: #1565C0;
+            box-shadow: inset 0 0 15px rgba(21, 101, 192, 0.2);
+            transform: scale(1.02);
+        }
+
+        .slot-label {
+            position: absolute; bottom: -35px; 
+            font-weight: bold; color: #666; width: 100%;
+            font-size: 1.2em;
+            pointer-events: none;
+        }
+        
+        .arrow-indicator {
+            font-size: 1.5em; color: #B0BEC5; margin: 0 2px;
+            align-self: center;
+        }
+
+        .items-pool {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 25px;
+            background: #FFF8E1;
+            border-radius: 20px;
+            min-height: 220px;
+            align-items: flex-start;
+            border: 2px solid #FFE082;
+        }
+
+        .draggable {
+            width: 170px; height: 210px;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.08);
+            z-index: 10;
+            position: relative;
+            touch-action: none; 
+            transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        .draggable.dragging {
+            opacity: 0.7;
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            transition: none;
+        }
+
+        .draggable-icon {
+            width: 120px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 8px;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .draggable-icon svg, .draggable-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            pointer-events: none;
+            filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.1));
+        }
+
+        .item-text-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1.2;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .item-name {
+            font-size: 28px;
+            color: #212121;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        .item-eng {
+            font-size: 18px; 
+            color: #546E7A;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+        
+        .draggable.placed { 
+            margin: 0; 
+            width: 100%; height: 100%;
+            border: none;
+            background: transparent;
+            box-shadow: none;
+            position: static;
+            transform: none;
+        }
+        
+        .draggable.placed .draggable-icon { width: 80px; height: 80px; margin-bottom: 0;}
+        .draggable.placed .item-name { font-size: 18px; } 
+        .draggable.placed .item-eng { display: none; }
+
+        .result-score { font-size: 5em; color: var(--primary-color); font-weight: bold; margin: 20px 0; }
+        .result-table {
+            width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 20px;
+            border-radius: 10px; overflow: hidden;
+            border: 1px solid #ddd;
+        }
+        .result-table th, .result-table td {
+            padding: 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 1.2em;
+        }
+        .result-table th { background: #E3F2FD; color: #1565C0; }
+        
+        .details-container {
+            margin-top: 30px;
+            width: 100%;
+            text-align: left;
+        }
+        .details-title { font-size: 1.5em; color: #333; margin-bottom: 10px; border-left: 5px solid var(--primary-color); padding-left: 10px; }
+        .details-table {
+            width: 100%; border-collapse: collapse;
+        }
+        .details-table th, .details-table td {
+            padding: 10px; border: 1px solid #eee; text-align: center;
+        }
+        .details-table th { background: #f9f9f9; color: #555; }
+        .ans-correct { color: #4CAF50; font-weight: bold; }
+        .ans-wrong { color: #F44336; font-weight: bold; }
+        
+        .lock-control {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #FFF3E0;
+            border: 2px solid #FFCC80;
+            border-radius: 15px;
+            display: inline-block;
+            width: 100%;
+            max-width: 300px;
+        }
+        .lock-control label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            cursor: pointer;
+            color: #E65100;
+        }
+        .lock-control input {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); display: none;
+            justify-content: center; align-items: center; z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+        .modal {
+            background: white; padding: 40px; border-radius: 30px;
+            text-align: center; max-width: 500px; width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from {transform: scale(0.5); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+
+        #upload-status {
+            margin-top: 10px;
+            color: #666;
+            font-style: italic;
+            height: 20px;
+        }
+
+        .password-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>一年級科學科</h1>
+        <h2>學段二 評估二：生活物品特性的辨識</h2>
+        <!-- 登出按鈕 -->
+        <button id="logout-btn" class="logout-btn" onclick="logout()">登出</button>
+    </header>
+
+    <!-- 0. 密碼頁面 -->
+    <div id="password-screen" class="card">
+        <div class="password-icon">🔒</div>
+        <h2>請輸入評估密碼</h2>
+        <div class="form-group">
+            <label for="password-input">密碼</label>
+            <input type="password" id="password-input" placeholder="請在此輸入密碼">
+        </div>
+        <button class="btn" onclick="checkPassword()">確認進入</button>
+    </div>
+
+    <!-- 1. 登入介面 -->
+    <div id="login-screen" class="card hidden">
+        <h2>學生登入</h2>
+        <div class="form-group">
+            <label>班別</label>
+            <select id="class-select" onchange="handleClassChange()">
+                <option value="" disabled selected>請選擇</option>
+                <option value="1A">1A</option>
+                <option value="1B">1B</option>
+                <option value="1C">1C</option>
+                <option value="1D">1D</option>
+                <option value="1E">1E</option>
+                <option value="CUSTOM">自訂</option>
+            </select>
+        </div>
+        <div id="student-group" class="form-group hidden">
+            <label>姓名</label>
+            <select id="student-select"></select>
+        </div>
+        <div id="custom-group" class="form-group hidden">
+            <label>輸入學號及姓名</label>
+            <input type="text" id="custom-input" placeholder="例如：1 陳小明">
+        </div>
+
+        <button id="start-btn" class="btn" onclick="startAssessment()">開始評估</button>
+        <p id="login-msg" style="color: red; margin-top: 10px;"></p>
+    </div>
+
+    <!-- 2. 評估介面 -->
+    <div id="game-screen" class="card hidden">
+        <div class="status-bar">
+            <span id="student-display"></span>
+            <span>部分: <span id="part-display">1</span>/4</span>
+        </div>
+        
+        <h3 class="instruction" id="instruction-text">題目說明</h3>
+
+        <div class="play-area" id="play-area">
+            <!-- 內容由 JS 動態生成 -->
+        </div>
+
+        <div style="margin-top: 30px;">
+            <button class="btn" onclick="checkCurrentPart()">提交答案</button>
+        </div>
+    </div>
+
+    <!-- 3. 結果介面 -->
+    <div id="result-screen" class="card hidden">
+        <h2>評估成績單</h2>
+        <div id="final-student-info" style="font-size: 1.5em; margin-bottom: 15px; color: #555;"></div>
+        <div class="result-score"><span id="total-score">0</span><span style="font-size:0.4em; color:#999;"> / 20</span></div>
+        
+        <table class="result-table">
+            <thead>
+                <tr>
+                    <th>部分</th>
+                    <th>滿分</th>
+                    <th>得分</th>
+                </tr>
+            </thead>
+            <tbody id="score-details"></tbody>
+        </table>
+
+        <!-- 詳細結果區域 -->
+        <div class="details-container">
+            <h3 class="details-title">詳細答題紀錄</h3>
+            <table class="details-table">
+                <thead>
+                    <tr>
+                        <th>題目內容</th>
+                        <th>學生答案</th>
+                        <th>正確答案</th>
+                        <th>結果</th>
+                    </tr>
+                </thead>
+                <tbody id="details-body"></tbody>
+            </table>
+        </div>
+
+        <!-- 鎖定控制與提交 -->
+        <div style="margin-top: 30px;">
+            <div class="lock-control">
+                <label>
+                    <input type="checkbox" id="lock-student-checkbox" checked>
+                    🔒 鎖定此學生 (禁止再次作答)
+                </label>
+            </div>
+            
+            <div id="upload-status"></div>
+            
+            <button id="next-student-btn" class="btn" onclick="submitAndNext()">下一位學生 (上傳成績)</button>
+        </div>
+    </div>
+
+    <!-- 回饋彈窗 -->
+    <div id="feedback-modal" class="modal-overlay">
+        <div class="modal">
+            <div id="modal-icon" style="font-size: 5em; margin-bottom: 20px;"></div>
+            <h3 id="modal-title" style="font-size: 2em; margin: 0 0 10px 0;"></h3>
+            <p id="modal-msg" style="font-size: 1.5em; color: #666;"></p>
+            <button class="btn" onclick="nextPart()">繼續</button>
+        </div>
+    </div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxlO1HvXreL2Lkr0dJuiVOfgA30vQfjvD8dGPZ2AzkdogpEnt_H8LH5JgTN8mLjvwyc/exec"; 
+    const STORAGE_KEY = 'science_assessment_data';
+
+    // === 學生資料 ===
+    const studentData = {
+        "1A": [{id:1,name:"陳熹雋"},{id:2,name:"陳意衡"},{id:3,name:"陳彥君"},{id:4,name:"陳楚皓"},{id:5,name:"陳彥羲"},{id:6,name:"侯林菲"},{id:7,name:"許皓琳"},{id:8,name:"黃煜軒"},{id:9,name:"關旨荇"},{id:10,name:"劉卓瀅"},{id:11,name:"劉仲宇"},{id:12,name:"羅卓熙"},{id:13,name:"李芯悦"},{id:14,name:"呂俊霖"},{id:15,name:"呂仲軒"},{id:16,name:"吳諾兒"},{id:17,name:"彭梓悦"},{id:18,name:"施鈞源"},{id:19,name:"孫子豪"},{id:20,name:"曾以仁"},{id:21,name:"曹正"},{id:22,name:"王天宇"},{id:23,name:"王柏諾"},{id:24,name:"胡悦翹"}],
+        "1B": [{id:1,name:"陳曉瑩"},{id:2,name:"陳梓韜"},{id:3,name:"陳永昇"},{id:4,name:"陳悅心"},{id:5,name:"張峻烽"},{id:6,name:"蔡宏鑫"},{id:7,name:"朱灝喆"},{id:8,name:"何允恒"},{id:9,name:"韓欣穎"},{id:10,name:"叶宇恒"},{id:11,name:"江泳琳"},{id:12,name:"關明菲"},{id:13,name:"鄺雪晴"},{id:14,name:"劉芊汝"},{id:15,name:"羅復希"},{id:16,name:"李俊霆"},{id:17,name:"李鎧"},{id:18,name:"梁凱淇"},{id:19,name:"巫恒逸"},{id:20,name:"柯芷晴"},{id:21,name:"蘇智泓"},{id:22,name:"曾鋭彬"},{id:23,name:"尹梓言"},{id:24,name:"胡梓榣"},{id:25,name:"丘文博"},{id:26,name:"朱鑠穎"}],
+        "1C": [{id:1,name:"歐陽子朗"},{id:2,name:"周柏橋"},{id:3,name:"鄭浚東"},{id:4,name:"張洛頤"},{id:5,name:"張允謙"},{id:6,name:"朱善鋐"},{id:7,name:"洪永灃"},{id:8,name:"葉愷晴"},{id:9,name:"江澤楷"},{id:10,name:"江泳婷"},{id:11,name:"郭曉靜"},{id:12,name:"林芊玥"},{id:13,name:"劉子儀"},{id:14,name:"李卓諾"},{id:15,name:"李柏翱"},{id:16,name:"梁心巧"},{id:17,name:"梁逸熹"},{id:18,name:"危逸辰"},{id:19,name:"潘承鈞"},{id:20,name:"蕭雨彤"},{id:21,name:"譚愷瑤"},{id:22,name:"譚丞竣"},{id:23,name:"田晞潼"},{id:24,name:"王樂澄"},{id:25,name:"黃子軒"},{id:26,name:"王梓然"},{id:27,name:"葉芷晴"}],
+        "1D": [{id:1,name:"陳振軒"},{id:2,name:"陳晞"},{id:3,name:"陳柏熹"},{id:4,name:"陳宏信"},{id:5,name:"張睎童"},{id:6,name:"周羲和"},{id:7,name:"徐朗睎"},{id:8,name:"方俊熹"},{id:9,name:"方梓喬"},{id:10,name:"江徽"},{id:11,name:"郭又嘉"},{id:12,name:"劉淳浠"},{id:13,name:"梁靖堯"},{id:14,name:"李祉諾"},{id:15,name:"林詩穎"},{id:16,name:"廖心瑜"},{id:17,name:"盧曉怡"},{id:18,name:"顏孝善"},{id:19,name:"鄧先喻"},{id:20,name:"鄧芷珺"},{id:21,name:"謝泓泰"},{id:22,name:"童衍嘉"},{id:23,name:"黃煦昡"},{id:24,name:"吳嘉鋭"},{id:25,name:"楊善雯"},{id:26,name:"姚芊語"}],
+        "1E": [{id:1,name:"陳希霖"},{id:2,name:"陳晞瑜"},{id:3,name:"陳君業"},{id:4,name:"陳溰琳"},{id:5,name:"陳星宇"},{id:6,name:"鄭子榆"},{id:7,name:"馮晞童"},{id:8,name:"何鉦霆"},{id:9,name:"許正翹"},{id:10,name:"郭柏希"},{id:11,name:"郭柏喬"},{id:12,name:"林嘉慧"},{id:13,name:"羅敏芫"},{id:14,name:"梁天豪"},{id:15,name:"連尉𧧽"},{id:16,name:"盧心怡"},{id:17,name:"勞以曈"},{id:18,name:"莫彥博"},{id:19,name:"潘柏皓"},{id:21,name:"蔡竣軒"},{id:22,name:"黃晉謙"},{id:23,name:"黃詩淇"},{id:24,name:"胡凱藍"},{id:25,name:"顏嘉希"},{id:26,name:"楊樂軒"}]
+    };
+
+    const svgPillow = `<svg viewBox="0 0 64 64"><rect x="4" y="16" width="56" height="32" rx="10" ry="10" fill="#E3F2FD" stroke="#42A5F5" stroke-width="1.5"/></svg>`;
+
+    const itemDB = {
+        soft: [
+            {id:'s1', name:'枕頭', eng:'Pillow', icon: svgPillow, img: '枕頭 (Pillow).png'},
+            {id:'s2', name:'棉花', eng:'Cotton', icon: '', img: '棉花 (Cotton).png'},
+            {id:'s3', name:'海綿', eng:'Sponge', icon: '', img: '海綿 (Sponge).png'},
+            {id:'s4', name:'毛巾', eng:'Towel', icon: '', img: '毛巾 (Towel).png'},
+            {id:'s5', name:'麵包', eng:'Bread', icon: '', img: '麵包 (Bread).png'},
+            {id:'s6', name:'泰迪熊', eng:'Teddy Bear', icon: '', img: '泰迪熊 (Teddy Bear).png'}
+        ],
+        hard: [
+            {id:'h1', name:'石頭', eng:'Rock', icon: '', img: '石頭 (Rock).png'},
+            {id:'h2', name:'鐵鎚', eng:'Hammer', icon: '', img: '鐵鎚 (Hammer).png'},
+            {id:'h3', name:'鑽石', eng:'Diamond', icon: '', img: '鑽石 (Diamond).png'},
+            {id:'h4', name:'木塊', eng:'Wood Block', icon: '', img: '木塊 (Wood Block).png'},
+            {id:'h5', name:'鎖匙', eng:'Key', icon: '', img: '鎖匙 (Key).png'},
+            {id:'h6', name:'磚頭', eng:'Brick', icon: '', img: '磚頭 (Brick).png'}
+        ],
+        weights: [
+            {id:'w1', name:'羽毛', eng:'Feather', icon: '', img: '羽毛 (Feather).png', val:1},
+            {id:'w2', name:'萬字夾', eng:'Paper Clip', icon: '', img: '萬字夾 (Paper Clip).png', val:2},
+            {id:'w3', name:'樹葉', eng:'Leaf', icon: '', img: '樹葉 (Leaf).png', val:3},
+            {id:'w4', name:'蘋果', eng:'Apple', icon: '', img: '蘋果 (Apple).png', val:20},
+            {id:'w5', name:'書本', eng:'Book', icon: '', img: '書本 (Book).png', val:30},
+            {id:'w6', name:'水樽', eng:'Water Bottle', icon: '', img: '水樽 (Water Bottle).png', val:25},
+            {id:'w7', name:'啞鈴', eng:'Dumbbell', icon: '', img: '啞鈴 (Dumbbell).png', val:80},
+            {id:'w9', name:'私家車', eng:'Car', icon: '', img: '私家車 (Car).png', val:90}
+        ],
+        elastic: [
+            {id:'e1', name:'橡皮圈', eng:'Rubber Band', icon: '', img: '橡皮圈 (Rubber Band).png', type:'yes'},
+            {id:'e2', name:'氣球', eng:'Balloon', icon: '', img: '氣球 (Balloon).png', type:'yes'},
+            {id:'e3', name:'彈弓', eng:'Slingshot', icon: '', img: '彈弓 (Slingshot).png', type:'yes'},
+            {id:'e4', name:'筷子', eng:'Chopsticks', icon: '', img: '筷子 (Chopsticks).png', type:'no'},
+            {id:'e5', name:'硬幣', eng:'Coin', icon: '', img: '硬幣 (Coin).png', type:'no'},
+            {id:'e6', name:'石頭', eng:'Rock', icon: '', img: '石頭 (Rock).png', type:'no'}
+        ],
+        translucent: [
+            {id:'t1', name:'玻璃杯', eng:'Glass Cup', icon: '', img: '玻璃杯 (Glass Cup).png', type:'yes'},
+            {id:'t2', name:'眼鏡', eng:'Glasses', icon: '', img: '眼鏡 (Glasses).png', type:'yes'},
+            {id:'t3', name:'放大鏡', eng:'Magnifying Glass', icon: '', img: '放大鏡 (Magnifying Glass).png', type:'yes'},
+            {id:'t4', name:'木門', eng:'Wooden Door', icon: '', img: '木門 (Wooden Door).png', type:'no'},
+            {id:'t5', name:'書本', eng:'Book', icon: '', img: '書本 (Book).png', type:'no'},
+            {id:'t6', name:'瓦煲', eng:'Clay Pot', icon: '', img: '瓦煲 (Clay Pot).png', type:'no'}
+        ]
+    };
+
+    let state = {
+        student: "",
+        studentNameOnly: "", 
+        classNo: "", 
+        part: 0, 
+        imageMode: 'real', 
+        scores: { p1:0, p2:0, p3:0, p4:0 },
+        currentItems: [],
+        droppedItems: {},
+        history: [],
+        answersData: {}
+    };
+
+    // 自動登入檢查
+    window.onload = function() {
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+            try {
+                const savedState = JSON.parse(savedData);
+                if (savedState.part > 0 || savedState.student) {
+                    state = savedState;
+                    restoreGameUI();
+                }
+            } catch (e) {
+                console.error("還原失敗", e);
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        }
+    };
+
+    function saveProgress() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function logout() {
+        if (confirm("確定要登出嗎？這將清除目前的進度。")) {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+    }
+
+    // 還原介面
+    function restoreGameUI() {
+        document.getElementById('password-screen').classList.add('hidden');
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('logout-btn').style.display = 'block';
+
+        if (state.student) {
+            document.getElementById('student-display').innerText = state.student;
+        }
+
+        if (state.part >= 1 && state.part <= 4) {
+            document.getElementById('game-screen').classList.remove('hidden');
+            
+            document.getElementById('part-display').innerText = state.part;
+            let instr = "";
+            if (state.part===1) instr="請將物品分類：軟的放左邊，硬的放右邊 (共6分)";
+            else if (state.part===2) instr="請依重量排列：由輕至重 (全對得4分)";
+            else if (state.part===3) instr="哪些有彈性？請分類 (共6分)";
+            else if (state.part===4) instr="哪些會透光？請分類 (共4分)";
+            document.getElementById('instruction-text').innerText = instr;
+
+            if (state.part===2) {
+                const area = document.getElementById("play-area");
+                area.innerHTML = `
+                    <div class="ordering-container">
+                        <div class="order-slot" data-slot="0"><span class="slot-label">最輕</span></div>
+                        <div class="arrow-indicator">➡</div>
+                        <div class="order-slot" data-slot="1"><span class="slot-label">中間</span></div>
+                        <div class="arrow-indicator">➡</div>
+                        <div class="order-slot" data-slot="2"><span class="slot-label">最重</span></div>
+                    </div>
+                    <div id="items-pool" class="items-pool"></div>
+                `;
+            } else {
+                let labels = [], types = [];
+                if (state.part===1) { labels=['軟','硬']; types=['soft','hard']; }
+                else if (state.part===3) { labels=['有彈性','沒有彈性']; types=['yes','no']; }
+                else if (state.part===4) { labels=['透光','不透光']; types=['yes','no']; }
+                
+                const area = document.getElementById("play-area");
+                area.innerHTML = `
+                    <div class="buckets-container">
+                        <div class="bucket" data-type="${types[0]}"><div class="bucket-label">${labels[0]}</div></div>
+                        <div class="bucket" data-type="${types[1]}"><div class="bucket-label">${labels[1]}</div></div>
+                    </div>
+                    <div id="items-pool" class="items-pool"></div>
+                `;
+            }
+
+            renderItems(state.currentItems);
+
+            for (const [idx, targetType] of Object.entries(state.droppedItems)) {
+                const itemEl = document.getElementById(`item-${idx}`);
+                if (itemEl) {
+                    let targetZone;
+                    if (state.part === 2) {
+                        targetZone = document.querySelector(`.order-slot[data-slot="${targetType}"]`);
+                    } else {
+                        targetZone = document.querySelector(`.bucket[data-type="${targetType}"]`);
+                    }
+                    
+                    if (targetZone) {
+                        targetZone.appendChild(itemEl);
+                        itemEl.classList.add('placed');
+                    }
+                }
+            }
+        } else if (state.part > 4) {
+            finishAssessment(true); 
+        }
+    }
+
+    function checkPassword() {
+        const pwd = document.getElementById('password-input').value;
+        if (pwd === "grandmont") {
+            document.getElementById('password-screen').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+        } else {
+            alert("密碼錯誤，請重新輸入！");
+            document.getElementById('password-input').value = ""; 
+        }
+    }
+
+    function shuffle(array) {
+        return array.sort(() => Math.random() - 0.5);
+    }
+    function getRandom(arr, n) {
+        return shuffle([...arr]).slice(0, n);
+    }
+
+    function handleClassChange() {
+        const cls = document.getElementById("class-select").value;
+        const sSelect = document.getElementById("student-select");
+        const sGroup = document.getElementById("student-group");
+        const cGroup = document.getElementById("custom-group");
+        
+        sSelect.innerHTML = '<option value="" disabled selected>請選擇學生</option>';
+        sGroup.classList.add("hidden");
+        cGroup.classList.add("hidden");
+
+        if (cls === "CUSTOM") {
+            cGroup.classList.remove("hidden");
+        } else if (studentData[cls]) {
+            sGroup.classList.remove("hidden");
+            const sortedStudents = [...studentData[cls]].sort((a, b) => a.id - b.id);
+            sortedStudents.forEach(s => {
+                let opt = document.createElement("option");
+                opt.value = `${s.id} ${s.name}`;
+                opt.text = `${s.id} ${s.name}`;
+                sSelect.add(opt);
+            });
+        }
+    }
+
+    function startAssessment() {
+        const cls = document.getElementById("class-select").value;
+        if (!cls) return alert("請選擇班別");
+        
+        const btn = document.getElementById("start-btn");
+        const loginMsg = document.getElementById("login-msg");
+        
+        btn.disabled = true;
+        btn.innerText = "載入中..."; 
+        loginMsg.innerText = "";
+
+        let fullStudentString = "";
+        let classNo = "";
+        let studentName = "";
+
+        if (cls === "CUSTOM") {
+            fullStudentString = document.getElementById("custom-input").value;
+            const parts = fullStudentString.match(/^(\d+)\s+(.+)$/);
+            if(parts) {
+                classNo = parts[1];
+                studentName = parts[2];
+            } else {
+                classNo = "0"; 
+                studentName = fullStudentString;
+            }
+        } else {
+            fullStudentString = document.getElementById("student-select").value;
+            if(!fullStudentString) {
+                btn.disabled = false;
+                btn.innerText = "開始評估";
+                return alert("請選擇學生");
+            }
+            const parts = fullStudentString.match(/^(\d+)\s+(.+)$/);
+            if(parts) {
+                classNo = parts[1];
+                studentName = parts[2];
+            }
+        }
+
+        const runGame = () => {
+            state.student = fullStudentString;
+            state.classNo = classNo;
+            state.studentNameOnly = studentName;
+            state.imageMode = 'real';
+
+            document.getElementById("login-screen").classList.add("hidden");
+            document.getElementById("game-screen").classList.remove("hidden");
+            document.getElementById("student-display").innerText = state.student;
+            document.getElementById("logout-btn").style.display = 'block';
+            saveProgress();
+            startPart1();
+        };
+
+        const checkUrl = `${GOOGLE_SCRIPT_URL}?class=${cls}&no=${classNo}`;
+        
+        const timeout = 2000; 
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+        fetch(checkUrl, { signal: controller.signal })
+            .then(response => response.json())
+            .then(data => {
+                clearTimeout(timeoutId);
+                if (data.locked) {
+                    btn.disabled = false;
+                    btn.innerText = "開始評估";
+                    loginMsg.innerText = "❌ 此學生已被鎖定，無法再次作答。";
+                    alert("此學生已被鎖定，無法再次作答。請聯絡老師解除鎖定。");
+                } else {
+                    runGame();
+                }
+            })
+            .catch(err => {
+                console.warn("Lock check failed or timed out, proceeding in offline mode.", err);
+                runGame(); 
+            });
+    }
+
+    function submitAndNext() {
+        const btn = document.getElementById("next-student-btn");
+        const statusDiv = document.getElementById("upload-status");
+        const isLocked = document.getElementById("lock-student-checkbox").checked;
+
+        btn.disabled = true;
+        btn.innerText = "正在上傳...";
+        statusDiv.innerText = "☁️ 正在上傳成績到 Google Sheet...";
+
+        const total = state.scores.p1 + state.scores.p2 + state.scores.p3 + state.scores.p4;
+        
+        const payload = {
+            class: document.getElementById("class-select").value,
+            classNo: state.classNo,       
+            studentName: state.studentNameOnly, 
+            totalScore: total,
+            scores: state.scores,
+            answers: state.answersData,
+            isLocked: isLocked            
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            statusDiv.innerText = "✅ 上傳成功！準備下一位...";
+            localStorage.removeItem(STORAGE_KEY);
+            setTimeout(() => {
+                resetUI();
+                btn.disabled = false;
+                btn.innerText = "下一位學生 (上傳成績)";
+            }, 1000);
+        }).catch(err => {
+            console.error(err);
+            statusDiv.innerText = "❌ 上傳失敗，請重試或手動記錄。";
+            btn.disabled = false;
+            btn.innerText = "重試上傳";
+        });
+    }
+
+    function resetUI() {
+        const currentClass = document.getElementById("class-select").value;
+        const studentSelect = document.getElementById("student-select");
+        const currentIndex = studentSelect.selectedIndex;
+
+        state.part = 0;
+        state.scores = { p1:0, p2:0, p3:0, p4:0 };
+        state.currentItems = [];
+        state.droppedItems = {};
+        state.history = [];
+        state.answersData = {};
+        
+        document.getElementById("result-screen").classList.add("hidden");
+        document.getElementById("login-screen").classList.remove("hidden");
+        document.getElementById("upload-status").innerHTML = ""; 
+        document.getElementById("login-msg").innerText = ""; 
+        document.getElementById("logout-btn").style.display = 'none'; 
+        
+        // Reset start button state
+        const startBtn = document.getElementById("start-btn");
+        startBtn.disabled = false;
+        startBtn.innerText = "開始評估";
+
+        const classSelect = document.getElementById("class-select");
+        classSelect.value = currentClass;
+        handleClassChange(); 
+        
+        if (currentClass !== "CUSTOM" && currentIndex > 0) {
+            const nextIndex = currentIndex + 1;
+            const newStudentSelect = document.getElementById("student-select");
+            if (nextIndex < newStudentSelect.options.length) {
+                newStudentSelect.selectedIndex = nextIndex;
+            } else {
+                newStudentSelect.selectedIndex = 0; 
+            }
+        } else {
+            document.getElementById("student-select").value = "";
+            document.getElementById("custom-input").value = "";
+        }
+    }
+
+    function startPart1() {
+        state.part = 1;
+        document.getElementById("part-display").innerText = "1";
+        document.getElementById("instruction-text").innerText = "請將物品分類：軟的放左邊，硬的放右邊 (共6分)";
+        
+        const softs = getRandom(itemDB.soft, 3).map(i => ({...i, type:'soft'}));
+        const hards = getRandom(itemDB.hard, 3).map(i => ({...i, type:'hard'}));
+        state.currentItems = shuffle([...softs, ...hards]);
+        state.droppedItems = {};
+        saveProgress(); 
+
+        renderBuckets(['軟', '硬'], ['soft', 'hard']);
+        renderItems(state.currentItems);
+    }
+
+    function startPart2() {
+        state.part = 2;
+        document.getElementById("part-display").innerText = "2";
+        document.getElementById("instruction-text").innerText = "請依重量排列：由輕至重 (全對得4分)";
+
+        const i1 = getRandom(itemDB.weights.slice(0,3), 1)[0];
+        const i2 = getRandom(itemDB.weights.slice(3,6), 1)[0];
+        const i3 = getRandom(itemDB.weights.slice(6,8), 1)[0];
+        state.currentItems = shuffle([i1, i2, i3]);
+        state.droppedItems = {};
+        saveProgress(); 
+
+        const area = document.getElementById("play-area");
+        area.innerHTML = `
+            <div class="ordering-container">
+                <div class="order-slot" data-slot="0"><span class="slot-label">最輕</span></div>
+                <div class="arrow-indicator">➡</div>
+                <div class="order-slot" data-slot="1"><span class="slot-label">中間</span></div>
+                <div class="arrow-indicator">➡</div>
+                <div class="order-slot" data-slot="2"><span class="slot-label">最重</span></div>
+            </div>
+            <div id="items-pool" class="items-pool"></div>
+        `;
+        renderItems(state.currentItems);
+    }
+
+    function startPart3() {
+        state.part = 3;
+        document.getElementById("part-display").innerText = "3";
+        document.getElementById("instruction-text").innerText = "哪些有彈性？請分類 (共6分)";
+
+        state.currentItems = getRandom(itemDB.elastic, 3);
+        state.droppedItems = {};
+        saveProgress(); 
+
+        renderBuckets(['有彈性', '沒有彈性'], ['yes', 'no']);
+        renderItems(state.currentItems);
+    }
+
+    function startPart4() {
+        state.part = 4;
+        document.getElementById("part-display").innerText = "4";
+        document.getElementById("instruction-text").innerText = "哪些會透光？請分類 (共4分)";
+
+        state.currentItems = getRandom(itemDB.translucent, 2);
+        state.droppedItems = {};
+        saveProgress(); 
+
+        renderBuckets(['透光', '不透光'], ['yes', 'no']);
+        renderItems(state.currentItems);
+    }
+
+    function renderBuckets(labels, types) {
+        const area = document.getElementById("play-area");
+        area.innerHTML = `
+            <div class="buckets-container">
+                <div class="bucket" data-type="${types[0]}"><div class="bucket-label">${labels[0]}</div></div>
+                <div class="bucket" data-type="${types[1]}"><div class="bucket-label">${labels[1]}</div></div>
+            </div>
+            <div id="items-pool" class="items-pool"></div>
+        `;
+    }
+
+    function renderItems(items) {
+        const pool = document.getElementById("items-pool");
+        items.forEach((item, idx) => {
+            const el = document.createElement("div");
+            el.className = "draggable";
+            el.draggable = false; 
+            el.id = `item-${idx}`;
+            el.dataset.idx = idx;
+
+            const flatIcon = (item.icon || '').replace(/\s+/g, ' ').trim();
+            const htmlSafeIcon = flatIcon.replace(/"/g, '&quot;');
+            let iconContent = `<img src="images/${item.img}" alt="${item.name}" draggable="false" onerror="this.onerror=null;this.parentElement.innerHTML='${htmlSafeIcon}';">`; 
+
+            el.innerHTML = `
+                <div class="draggable-icon">${iconContent}</div>
+                <div class="item-text-container">
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-eng">${item.eng}</div>
+                </div>
+            `;
+            
+            el.addEventListener("touchstart", handleTouchStart, {passive: false});
+            el.addEventListener("touchmove", handleTouchMove, {passive: false});
+            el.addEventListener("touchend", handleTouchEnd);
+            el.addEventListener("mousedown", handleMouseDown);
+
+            pool.appendChild(el);
+        });
+    }
+
+    let activeDrag = null;
+    let startX, startY;
+    let currentDroppable = null;
+    let originalParent = null; 
+
+    function handleTouchStart(e) {
+        e.preventDefault(); 
+        const touch = e.touches[0];
+        startDrag(e.currentTarget, touch.clientX, touch.clientY);
+    }
+
+    function handleMouseDown(e) {
+        e.preventDefault();
+        startDrag(e.currentTarget, e.clientX, e.clientY);
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+    }
+
+    function startDrag(el, clientX, clientY) {
+        if (el.classList.contains('placed')) {
+            el.classList.remove('placed');
+        }
+
+        activeDrag = el;
+        activeDrag.classList.add('dragging');
+        originalParent = el.parentElement; 
+        
+        activeDrag.dataset.startX = clientX;
+        activeDrag.dataset.startY = clientY;
+        activeDrag.dataset.currentTx = 0;
+        activeDrag.dataset.currentTy = 0;
+    }
+
+    function handleTouchMove(e) {
+        if (!activeDrag) return;
+        e.preventDefault();
+        const touch = e.touches[0];
+        moveDrag(touch.clientX, touch.clientY);
+    }
+
+    function onMouseMove(e) {
+        if (!activeDrag) return;
+        moveDrag(e.clientX, e.clientY);
+    }
+
+    function moveDrag(clientX, clientY) {
+        const dx = clientX - parseFloat(activeDrag.dataset.startX);
+        const dy = clientY - parseFloat(activeDrag.dataset.startY);
+        
+        activeDrag.style.transform = `translate(${dx}px, ${dy}px) scale(1.1)`;
+        activeDrag.dataset.currentTx = dx;
+        activeDrag.dataset.currentTy = dy;
+
+        activeDrag.style.display = 'none';
+        let elemBelow = document.elementFromPoint(clientX, clientY);
+        activeDrag.style.display = ''; 
+
+        if (!elemBelow) return;
+
+        let droppableBelow = elemBelow.closest('.bucket, .order-slot');
+        
+        if (currentDroppable != droppableBelow) {
+            if (currentDroppable) {
+                currentDroppable.classList.remove('active-drop');
+            }
+            currentDroppable = droppableBelow;
+            if (currentDroppable) {
+                currentDroppable.classList.add('active-drop');
+            }
+        }
+    }
+
+    function handleTouchEnd(e) {
+        endDrag();
+    }
+
+    function onMouseUp(e) {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        endDrag();
+    }
+
+    function endDrag() {
+        if (!activeDrag) return;
+        
+        activeDrag.classList.remove('dragging');
+        
+        if (currentDroppable) {
+            currentDroppable.classList.remove('active-drop');
+            
+            if (state.part === 2 && currentDroppable.children.length > 1 && currentDroppable !== originalParent) {
+                placeItem(activeDrag, originalParent);
+            } else {
+                placeItem(activeDrag, currentDroppable);
+            }
+        } else {
+            returnToPool(activeDrag);
+        }
+
+        activeDrag = null;
+        currentDroppable = null;
+        originalParent = null;
+        saveProgress(); 
+    }
+
+    function returnToPool(el) {
+        const pool = document.getElementById("items-pool");
+        el.style.transform = ''; 
+        el.classList.remove("placed");
+        pool.appendChild(el);
+        delete state.droppedItems[el.dataset.idx];
+    }
+
+    function placeItem(el, targetZone) {
+        el.style.transform = ''; 
+        targetZone.appendChild(el);
+        el.classList.add("placed");
+        
+        const itemIdx = el.dataset.idx;
+        if (targetZone.id === "items-pool") {
+             returnToPool(el); 
+             return;
+        }
+
+        if (state.part === 2) {
+            state.droppedItems[itemIdx] = targetZone.dataset.slot;
+        } else {
+            state.droppedItems[itemIdx] = targetZone.dataset.type;
+        }
+    }
+
+    function getLabel(part, key) {
+        if (part === 1) return key === 'soft' ? '軟' : '硬';
+        if (part === 2) return key == 0 ? '最輕' : (key == 1 ? '中間' : '最重');
+        if (part === 3) return key === 'yes' ? '有彈性' : '沒有彈性';
+        if (part === 4) return key === 'yes' ? '透光' : '不透光';
+        return key;
+    }
+
+    function getPartName(part) {
+        if (part === 1) return "軟硬辨別";
+        if (part === 2) return "輕重排序";
+        if (part === 3) return "彈性測試";
+        if (part === 4) return "透光觀察";
+        return "";
+    }
+
+    function checkCurrentPart() {
+        if (Object.keys(state.droppedItems).length < state.currentItems.length) {
+            alert("請將所有物品分類或排序！");
+            return;
+        }
+
+        let score = 0;
+        let msg = "";
+        let partHistory = [];
+
+        if (state.part === 1) { 
+            state.currentItems.forEach((item, idx) => {
+                const ans = state.droppedItems[idx];
+                const isCorrect = ans === item.type;
+                if (isCorrect) score += 1;
+                
+                partHistory.push({
+                    item: item.name,
+                    studentAns: getLabel(1, ans),
+                    correctAns: getLabel(1, item.type),
+                    isCorrect: isCorrect
+                });
+            });
+            state.scores.p1 = score;
+            msg = `本部分得分：${score} / 6`;
+        
+        } else if (state.part === 2) { 
+            const sortedItems = [...state.currentItems].sort((a,b) => a.val - b.val);
+            let isAllCorrect = true;
+            for(let i=0; i<3; i++) {
+                const placedItemIdx = Object.keys(state.droppedItems).find(key => state.droppedItems[key] == i);
+                if (placedItemIdx === undefined) { isAllCorrect = false; break; }
+                const item = state.currentItems[placedItemIdx];
+                const targetItem = sortedItems[i]; 
+                
+                if (item.val !== targetItem.val) isAllCorrect = false;
+            }
+
+            partHistory = state.currentItems.map((item, idx) => {
+                const userSlot = state.droppedItems[idx];
+                const correctSlotIndex = sortedItems.findIndex(sItem => sItem.id === item.id);
+                
+                return {
+                    item: item.name,
+                    studentAns: getLabel(2, userSlot),
+                    correctAns: getLabel(2, correctSlotIndex), 
+                    isCorrect: isAllCorrect 
+                };
+            });
+
+            if (isAllCorrect) score = 4;
+            state.scores.p2 = score;
+            msg = isAllCorrect ? "全對！太厲害了！ (4分)" : "順序不對喔，再接再厲！ (0分)";
+
+        } else if (state.part === 3) { 
+            state.currentItems.forEach((item, idx) => {
+                const ans = state.droppedItems[idx];
+                const isCorrect = ans === item.type;
+                if (isCorrect) score += 2;
+                partHistory.push({
+                    item: item.name,
+                    studentAns: getLabel(3, ans),
+                    correctAns: getLabel(3, item.type),
+                    isCorrect: isCorrect
+                });
+            });
+            state.scores.p3 = score;
+            msg = `本部分得分：${score} / 6`;
+
+        } else if (state.part === 4) { 
+            state.currentItems.forEach((item, idx) => {
+                const ans = state.droppedItems[idx];
+                const isCorrect = ans === item.type;
+                if (isCorrect) score += 2;
+                partHistory.push({
+                    item: item.name,
+                    studentAns: getLabel(4, ans),
+                    correctAns: getLabel(4, item.type),
+                    isCorrect: isCorrect
+                });
+            });
+            state.scores.p4 = score;
+            msg = `本部分得分：${score} / 4`;
+        }
+
+        state.history.push({
+            partName: getPartName(state.part),
+            details: partHistory
+        });
+        saveProgress(); 
+
+        showModal(score > 0 ? "🎉 完成！" : "💪 加油！", msg);
+    }
+
+    function showModal(title, msg) {
+        document.getElementById("modal-title").innerText = title;
+        document.getElementById("modal-msg").innerText = msg;
+        document.getElementById("feedback-modal").style.display = "flex";
+    }
+
+    function nextPart() {
+        document.getElementById("feedback-modal").style.display = "none";
+        if (state.part === 1) startPart2();
+        else if (state.part === 2) startPart3();
+        else if (state.part === 3) startPart4();
+        else finishAssessment();
+    }
+
+    function finishAssessment(isRestore = false) {
+        state.part = 5; 
+        if(!isRestore) saveProgress();
+
+        document.getElementById("game-screen").classList.add("hidden");
+        document.getElementById("result-screen").classList.remove("hidden");
+        // document.getElementById("logout-btn").style.display = 'none'; 
+        
+        const total = state.scores.p1 + state.scores.p2 + state.scores.p3 + state.scores.p4;
+        document.getElementById("total-score").innerText = total;
+        document.getElementById("final-student-info").innerText = state.student;
+        const tbody = document.getElementById("score-details");
+        tbody.innerHTML = `
+            <tr><td>1. 軟硬分辨</td><td>6</td><td>${state.scores.p1}</td></tr>
+            <tr><td>2. 輕重排序</td><td>4</td><td>${state.scores.p2}</td></tr>
+            <tr><td>3. 彈性測試</td><td>6</td><td>${state.scores.p3}</td></tr>
+            <tr><td>4. 透光觀察</td><td>4</td><td>${state.scores.p4}</td></tr>
+        `;
+
+        const detailsBody = document.getElementById("details-body");
+        let detailsHTML = "";
+        let answersData = { p1: "", p2: "", p3: "", p4: "" };
+
+        state.history.forEach((section, index) => {
+            detailsHTML += `<tr><td colspan="4" style="background:#eee; font-weight:bold;">${section.partName}</td></tr>`;
+            let partAnsStr = "";
+            section.details.forEach(q => {
+                const statusClass = q.isCorrect ? "ans-correct" : "ans-wrong";
+                const statusText = q.isCorrect ? "⭕ 正確" : "❌ 錯誤";
+                detailsHTML += `
+                    <tr>
+                        <td>${q.item}</td>
+                        <td>${q.studentAns}</td>
+                        <td>${q.correctAns}</td>
+                        <td class="${statusClass}">${statusText}</td>
+                    </tr>
+                `;
+                partAnsStr += `${q.item}:${q.studentAns}(${q.isCorrect?'O':'X'}), `;
+            });
+            if (index === 0) answersData.p1 = partAnsStr;
+            if (index === 1) answersData.p2 = partAnsStr;
+            if (index === 2) answersData.p3 = partAnsStr;
+            if (index === 3) answersData.p4 = partAnsStr;
+        });
+        detailsBody.innerHTML = detailsHTML;
+        
+        state.answersData = answersData; 
+        document.getElementById("upload-status").innerText = ""; 
+        document.getElementById("lock-student-checkbox").checked = true;
+    }
+
+</script>
+</body>
+</html>
