@@ -387,6 +387,7 @@
             color: #666;
             font-style: italic;
             height: 20px;
+            font-weight: bold;
         }
 
         .password-icon {
@@ -498,16 +499,16 @@
 
         <!-- 鎖定控制與提交 -->
         <div style="margin-top: 30px;">
-            <div class="lock-control">
+            <div class="lock-control" style="opacity: 0.8;">
                 <label>
-                    <input type="checkbox" id="lock-student-checkbox" checked>
-                    🔒 鎖定此學生 (禁止再次作答)
+                    <input type="checkbox" id="lock-student-checkbox" checked disabled>
+                    🔒 學生已鎖定 (成績已上傳)
                 </label>
             </div>
             
             <div id="upload-status"></div>
             
-            <button id="next-student-btn" class="btn" onclick="submitAndNext()">下一位學生 (上傳成績)</button>
+            <button id="next-student-btn" class="btn" onclick="resetUI()">下一位學生</button>
         </div>
     </div>
 
@@ -803,6 +804,7 @@
 
         const checkUrl = `${GOOGLE_SCRIPT_URL}?class=${cls}&no=${classNo}`;
         
+        // 取消逾時機制，改為直接請求並等待回應
         fetch(checkUrl)
             .then(response => response.json())
             .then(data => {
@@ -819,22 +821,18 @@
                 console.error("Lock check failed", err);
                 btn.disabled = false;
                 btn.innerText = "開始評估";
-                loginMsg.innerText = "⚠️ 無法連接伺服器檢查狀態，請檢查網絡或稍後再試。";
-                alert("無法連接伺服器檢查狀態。為確保公平性，無法在離線狀態下開始。請檢查網絡連線。");
+                loginMsg.innerText = "⚠️ 無法連接伺服器檢查狀態，請檢查網絡。";
+                alert("無法連接伺服器檢查狀態，請檢查網絡連線。\n(為確保已鎖定學生不能重做，必須連線才能開始)");
             });
     }
 
-    function submitAndNext() {
-        const btn = document.getElementById("next-student-btn");
+    // 自動上傳函式
+    function uploadData() {
         const statusDiv = document.getElementById("upload-status");
-        const isLocked = document.getElementById("lock-student-checkbox").checked;
-
-        btn.disabled = true;
-        btn.innerText = "正在上傳...";
-        statusDiv.innerText = "☁️ 正在上傳成績到 Google Sheet...";
-
-        const total = state.scores.p1 + state.scores.p2 + state.scores.p3 + state.scores.p4;
         
+        statusDiv.innerHTML = '<div style="color:#0277BD; font-weight:bold;">☁️ 正在自動上傳成績...</div>';
+        
+        const total = state.scores.p1 + state.scores.p2 + state.scores.p3 + state.scores.p4;
         const payload = {
             class: document.getElementById("class-select").value,
             classNo: state.classNo,       
@@ -842,7 +840,7 @@
             totalScore: total,
             scores: state.scores,
             answers: state.answersData,
-            isLocked: isLocked            
+            isLocked: true 
         };
 
         fetch(GOOGLE_SCRIPT_URL, {
@@ -851,18 +849,11 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         }).then(() => {
-            statusDiv.innerText = "✅ 上傳成功！準備下一位...";
-            localStorage.removeItem(STORAGE_KEY);
-            setTimeout(() => {
-                resetUI();
-                btn.disabled = false;
-                btn.innerText = "下一位學生 (上傳成績)";
-            }, 1000);
+            statusDiv.innerHTML = '<div style="color:green; font-weight:bold;">✅ 成績已自動儲存並鎖定！</div>';
+            localStorage.removeItem(STORAGE_KEY); 
         }).catch(err => {
             console.error(err);
-            statusDiv.innerText = "❌ 上傳失敗，請重試或手動記錄。";
-            btn.disabled = false;
-            btn.innerText = "重試上傳";
+            statusDiv.innerHTML = '<div style="color:red; font-weight:bold;">❌ 上傳失敗，請檢查網絡。<button class="btn btn-sm btn-outline-danger" onclick="uploadData()" style="margin-left:10px;">重試</button></div>';
         });
     }
 
@@ -1272,11 +1263,14 @@
 
     function finishAssessment(isRestore = false) {
         state.part = 5; 
-        if(!isRestore) saveProgress();
+        if(!isRestore) {
+            saveProgress();
+            // 自動上傳
+            uploadData();
+        }
 
         document.getElementById("game-screen").classList.add("hidden");
         document.getElementById("result-screen").classList.remove("hidden");
-        // document.getElementById("logout-btn").style.display = 'none'; 
         
         const total = state.scores.p1 + state.scores.p2 + state.scores.p3 + state.scores.p4;
         document.getElementById("total-score").innerText = total;
@@ -1317,8 +1311,8 @@
         detailsBody.innerHTML = detailsHTML;
         
         state.answersData = answersData; 
-        document.getElementById("upload-status").innerText = ""; 
         document.getElementById("lock-student-checkbox").checked = true;
+        document.getElementById("lock-student-checkbox").disabled = true;
     }
 
 </script>
