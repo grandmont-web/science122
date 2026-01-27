@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>一年級科學科 學段二 評估二</title>
+    <title>一年級科學科 第二學段 評估三</title>
     <style>
         :root {
             --primary-color: #5C9CE6;
@@ -402,7 +402,7 @@
 
     <header>
         <h1>一年級科學科</h1>
-        <h2>學段二 評估二：生活物品特性的辨識</h2>
+        <h2>第二學段 進評三：生活物品特性的辨識</h2>
         <!-- 登出按鈕 -->
         <button id="logout-btn" class="logout-btn" onclick="logout()">登出</button>
     </header>
@@ -1148,8 +1148,8 @@
     function getPartName(part) {
         if (part === 1) return "軟硬辨別";
         if (part === 2) return "輕重排序";
-        if (part === 3) return "彈性測試";
-        if (part === 4) return "透光觀察";
+        if (part === 3) return "彈性辨別";
+        if (part === 4) return "透光辨別";
         return "";
     }
 
@@ -1279,8 +1279,8 @@
         tbody.innerHTML = `
             <tr><td>1. 軟硬分辨</td><td>6</td><td>${state.scores.p1}</td></tr>
             <tr><td>2. 輕重排序</td><td>4</td><td>${state.scores.p2}</td></tr>
-            <tr><td>3. 彈性測試</td><td>6</td><td>${state.scores.p3}</td></tr>
-            <tr><td>4. 透光觀察</td><td>4</td><td>${state.scores.p4}</td></tr>
+            <tr><td>3. 彈性辨別</td><td>6</td><td>${state.scores.p3}</td></tr>
+            <tr><td>4. 透光辨別</td><td>4</td><td>${state.scores.p4}</td></tr>
         `;
 
         const detailsBody = document.getElementById("details-body");
@@ -1318,3 +1318,4 @@
 </script>
 </body>
 </html>
+
